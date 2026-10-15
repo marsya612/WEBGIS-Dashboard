@@ -1,0 +1,893 @@
+<!doctype html>
+<html lang="id" data-access="public">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>WebGIS · Sistem Informasi Geografis berbasis web</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <script src="auth.js"></script>
+    <style>
+      :root {
+        --ink: #16302b;
+        --muted: #5b7068;
+        --line: #e3ebe7;
+        --primary: #0e7c66;
+        --primary-d: #0a5c4c;
+        --accent: #f2a93b;
+        --blue: #2b7bb9;
+        --radius: 18px;
+        --shadow: 0 10px 30px rgba(16, 60, 50, 0.12);
+      }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      html {
+        scroll-behavior: smooth;
+      }
+      body {
+        font-family:
+          "Plus Jakarta Sans",
+          system-ui,
+          -apple-system,
+          Segoe UI,
+          Roboto,
+          sans-serif;
+        color: var(--ink);
+        background: #f5faf7;
+        line-height: 1.6;
+      }
+      [hidden] {
+        display: none !important;
+      }
+      a {
+        color: inherit;
+      }
+      button {
+        font: inherit;
+        cursor: pointer;
+        border: 0;
+        background: none;
+        color: inherit;
+      }
+      img,
+      svg {
+        max-width: 100%;
+      }
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        padding: 10px 18px;
+        border-radius: 12px;
+        font-weight: 700;
+        font-size: 14px;
+        background: var(--primary);
+        color: #fff;
+        text-decoration: none;
+        box-shadow: 0 4px 12px rgba(14, 124, 102, 0.3);
+        transition: 0.2s;
+        border: 0;
+      }
+      .btn:hover {
+        background: var(--primary-d);
+        transform: translateY(-1px);
+      }
+      .btn:disabled {
+        opacity: 0.6;
+        cursor: wait;
+      }
+      .btn.ghost {
+        background: #fff;
+        color: var(--primary-d);
+        box-shadow: inset 0 0 0 2px #cfe3da;
+      }
+      .btn.ghost:hover {
+        background: #eef6f2;
+      }
+      .btn.lg {
+        padding: 13px 24px;
+        font-size: 15px;
+        border-radius: 14px;
+      }
+      .btn.block {
+        width: 100%;
+      }
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-weight: 800;
+        font-size: 20px;
+        color: var(--primary-d);
+        text-decoration: none;
+      }
+      .brand .logo {
+        width: 38px;
+        height: 38px;
+        border-radius: 12px;
+        display: grid;
+        place-items: center;
+        font-size: 20px;
+        background: linear-gradient(135deg, var(--primary), #2cb69a);
+        color: #fff;
+        box-shadow: 0 6px 14px rgba(14, 124, 102, 0.35);
+      }
+
+      /* ---------- Landing ---------- */
+      .pub-nav {
+        position: sticky;
+        top: 0;
+        z-index: 30;
+        background: rgba(255, 255, 255, 0.88);
+        backdrop-filter: blur(10px);
+        border-bottom: 1px solid var(--line);
+      }
+      .pub-nav .in {
+        max-width: 1160px;
+        margin: 0 auto;
+        padding: 12px 20px;
+        display: flex;
+        align-items: center;
+        gap: 20px;
+      }
+      .links {
+        display: flex;
+        gap: 22px;
+        margin-left: auto;
+        align-items: center;
+        font-weight: 600;
+        font-size: 14.5px;
+      }
+      .links a {
+        text-decoration: none;
+      }
+      .links a:not(.btn):hover {
+        color: var(--primary);
+      }
+      .burger {
+        display: none;
+        margin-left: auto;
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        font-size: 20px;
+        background: #fff;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      }
+      .wrap {
+        max-width: 1160px;
+        margin: 0 auto;
+        padding: 0 20px;
+      }
+      .hero {
+        background:
+          radial-gradient(900px 400px at 85% 0%, #d3ecf7 0, transparent 60%),
+          radial-gradient(700px 400px at 0% 20%, #d8efe3 0, transparent 60%);
+      }
+      .hero .wrap {
+        display: grid;
+        grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+        gap: 40px;
+        align-items: center;
+        padding-top: 64px;
+        padding-bottom: 64px;
+      }
+      .tag {
+        display: inline-block;
+        background: #e3f4ec;
+        color: var(--primary-d);
+        font-weight: 700;
+        font-size: 13px;
+        padding: 6px 14px;
+        border-radius: 999px;
+        margin-bottom: 16px;
+      }
+      .hero h1 {
+        font-size: clamp(32px, 5vw, 54px);
+        line-height: 1.12;
+        font-weight: 800;
+        margin-bottom: 16px;
+      }
+      .hero h1 span {
+        background: linear-gradient(120deg, var(--primary), var(--blue));
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+      }
+      .hero p {
+        color: var(--muted);
+        font-size: 17px;
+        max-width: 560px;
+        margin-bottom: 26px;
+      }
+      .cta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+      }
+      .hero-art {
+        position: relative;
+        background: #fff;
+        border-radius: 26px;
+        padding: 14px;
+        box-shadow: var(--shadow);
+      }
+      .hero-art svg {
+        display: block;
+        width: 100%;
+        height: auto;
+        border-radius: 18px;
+      }
+      .chip {
+        position: absolute;
+        background: #fff;
+        border-radius: 14px;
+        padding: 8px 14px;
+        font-size: 13px;
+        font-weight: 700;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+      }
+      .chip.a {
+        left: -14px;
+        top: 26px;
+      }
+      .chip.b {
+        right: -10px;
+        bottom: 34px;
+      }
+      section.block {
+        padding: 64px 0;
+      }
+      .h2 {
+        font-size: clamp(24px, 3.4vw, 34px);
+        font-weight: 800;
+        text-align: center;
+        margin-bottom: 10px;
+      }
+      .sub {
+        color: var(--muted);
+        text-align: center;
+        max-width: 680px;
+        margin: 0 auto 34px;
+      }
+      .about {
+        background: #fff;
+        border-radius: 24px;
+        box-shadow: var(--shadow);
+        padding: 30px 34px;
+        display: grid;
+        grid-template-columns: auto 1fr;
+        gap: 24px;
+        align-items: center;
+      }
+      .about .ic {
+        font-size: 56px;
+      }
+      .about p {
+        font-size: 16.5px;
+      }
+      .cats {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 18px;
+      }
+      .cat {
+        border-radius: 20px;
+        color: #fff;
+        padding: 22px;
+        min-height: 150px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+      }
+      .cat .e {
+        font-size: 38px;
+      }
+      .cat b {
+        font-family: "Baloo 2", cursive;
+        font-size: 26px;
+        letter-spacing: 1px;
+        line-height: 1.1;
+      }
+      .cat small {
+        opacity: 0.92;
+      }
+      .c-geografis {
+        background: linear-gradient(120deg, #6b8e23, #a3b94a);
+      }
+      .c-infrastruktur {
+        background: linear-gradient(120deg, #2b7bb9, #6cc3e8);
+      }
+      .c-lingkungan {
+        background: linear-gradient(120deg, #2f8f4e, #7bc96f);
+      }
+      .c-sosial {
+        background: linear-gradient(120deg, #c2703a, #f2a93b);
+      }
+      .feats {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 18px;
+      }
+      .feat {
+        background: #fff;
+        border-radius: 20px;
+        padding: 22px;
+        box-shadow: var(--shadow);
+      }
+      .feat i {
+        font-style: normal;
+        display: grid;
+        place-items: center;
+        width: 48px;
+        height: 48px;
+        border-radius: 14px;
+        background: #e3f4ec;
+        font-size: 24px;
+        margin-bottom: 12px;
+      }
+      .feat h3 {
+        font-size: 16.5px;
+        margin-bottom: 4px;
+      }
+      .feat p {
+        color: var(--muted);
+        font-size: 14px;
+      }
+      .steps {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 20px;
+        counter-reset: s;
+      }
+      .step {
+        background: #fff;
+        border-radius: 20px;
+        padding: 24px;
+        box-shadow: var(--shadow);
+        position: relative;
+      }
+      .step::before {
+        counter-increment: s;
+        content: counter(s);
+        display: grid;
+        place-items: center;
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        background: var(--primary);
+        color: #fff;
+        font-weight: 800;
+        margin-bottom: 12px;
+      }
+      .step h3 {
+        margin-bottom: 4px;
+      }
+      .step p {
+        color: var(--muted);
+        font-size: 14.5px;
+      }
+      .band {
+        background: linear-gradient(120deg, #0a5c4c, #0e7c66 50%, #2b7bb9);
+        color: #fff;
+        border-radius: 26px;
+        padding: 40px 24px;
+        text-align: center;
+      }
+      .band h2 {
+        font-size: clamp(22px, 3vw, 32px);
+        margin-bottom: 8px;
+      }
+      .band p {
+        opacity: 0.92;
+        margin-bottom: 20px;
+      }
+      .band .btn {
+        background: #fff;
+        color: var(--primary-d);
+      }
+      .band .btn.ghost {
+        background: transparent;
+        color: #fff;
+        box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.7);
+      }
+      footer.pub {
+        padding: 28px 0 36px;
+        text-align: center;
+        color: var(--muted);
+        font-size: 13.5px;
+      }
+
+      /* ---------- Login / Daftar ---------- */
+      .auth {
+        min-height: 100vh;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      }
+      .auth-side {
+        background: linear-gradient(150deg, #0a5c4c, #0e7c66 45%, #2b7bb9);
+        color: #fff;
+        padding: 48px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        gap: 30px;
+        position: relative;
+        overflow: hidden;
+      }
+      .auth-side::before,
+      .auth-side::after {
+        content: "";
+        position: absolute;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.08);
+      }
+      .auth-side::before {
+        width: 380px;
+        height: 380px;
+        right: -120px;
+        bottom: -120px;
+      }
+      .auth-side::after {
+        width: 200px;
+        height: 200px;
+        left: -60px;
+        top: 35%;
+      }
+      .auth-side > * {
+        position: relative;
+        z-index: 1;
+      }
+      .auth-side .brand {
+        color: #fff;
+      }
+      .auth-side .brand .logo {
+        background: rgba(255, 255, 255, 0.2);
+        box-shadow: none;
+      }
+      .auth-side h2 {
+        font-size: clamp(26px, 3vw, 38px);
+        line-height: 1.2;
+        margin-bottom: 12px;
+      }
+      .auth-side p {
+        opacity: 0.92;
+        max-width: 430px;
+      }
+      .auth-side ul {
+        list-style: none;
+        display: grid;
+        gap: 10px;
+        margin-top: 20px;
+        font-weight: 600;
+      }
+      .auth-main {
+        display: grid;
+        place-items: center;
+        padding: 32px 20px;
+        background: #f5faf7;
+      }
+      .auth-card {
+        width: min(440px, 100%);
+        background: #fff;
+        border-radius: 22px;
+        box-shadow: var(--shadow);
+        padding: 30px;
+      }
+      .auth-card .back {
+        display: inline-block;
+        font-size: 13.5px;
+        font-weight: 700;
+        color: var(--primary-d);
+        text-decoration: none;
+        margin-bottom: 14px;
+      }
+      .auth-card h1 {
+        font-size: 28px;
+        margin-bottom: 4px;
+      }
+      .auth-card .lead {
+        color: var(--muted);
+        font-size: 14.5px;
+        margin-bottom: 18px;
+      }
+      .auth-card form {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        margin-bottom: 10px;
+      }
+      .auth-card label {
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--muted);
+        margin-top: 8px;
+      }
+      .auth-card input[type="text"],
+      .auth-card input[type="email"],
+      .auth-card input[type="password"] {
+        font: inherit;
+        width: 100%;
+        padding: 12px 14px;
+        border-radius: 12px;
+        border: 1.5px solid #d4e1db;
+        background: #fff;
+      }
+      input:focus {
+        outline: 3px solid #bfe6d9;
+        border-color: var(--primary);
+      }
+      .pw {
+        position: relative;
+      }
+      .pw input {
+        padding-right: 46px !important;
+      }
+      .pw button {
+        position: absolute;
+        right: 6px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        font-size: 17px;
+      }
+      .pw button:hover {
+        background: #eef6f2;
+      }
+      .chk {
+        display: flex !important;
+        align-items: center;
+        gap: 8px;
+        font-weight: 600 !important;
+        margin: 10px 0 14px !important;
+      }
+      .chk input {
+        width: 18px;
+        height: 18px;
+        accent-color: var(--primary);
+      }
+      .alert {
+        padding: 10px 14px;
+        border-radius: 12px;
+        font-size: 14px;
+        font-weight: 600;
+        margin-bottom: 12px;
+      }
+      .alert.err {
+        background: #fdeceb;
+        color: #b42318;
+      }
+      .alert.ok {
+        background: #e6f6ec;
+        color: #17692f;
+      }
+      .alert.info {
+        background: #e8f1fb;
+        color: #1e4f8a;
+      }
+      .hint {
+        background: #fff8e6;
+        border: 1px dashed #f2c76b;
+        border-radius: 12px;
+        padding: 10px 12px;
+        font-size: 13px;
+        margin: 12px 0 0;
+      }
+      .alt {
+        text-align: center;
+        font-size: 14px;
+        color: var(--muted);
+        margin-top: 16px;
+      }
+      .alt a {
+        color: var(--primary-d);
+        font-weight: 700;
+      }
+      .center-page {
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        padding: 20px;
+        background:
+          radial-gradient(800px 400px at 80% 0, #d3ecf7, transparent 60%),
+          radial-gradient(700px 400px at 0 100%, #d8efe3, transparent 60%), #f5faf7;
+      }
+      .bye {
+        width: min(460px, 100%);
+        background: #fff;
+        border-radius: 24px;
+        box-shadow: var(--shadow);
+        padding: 36px 28px;
+        text-align: center;
+      }
+      .bye .e {
+        font-size: 60px;
+        margin-bottom: 6px;
+      }
+      .bye h1 {
+        font-size: 26px;
+        margin-bottom: 6px;
+      }
+      .bye p {
+        color: var(--muted);
+        margin-bottom: 22px;
+      }
+      .bye .cta {
+        justify-content: center;
+      }
+
+      /* ---------- Responsif ---------- */
+      @media (max-width: 980px) {
+        .cats,
+        .feats {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+        .steps {
+          grid-template-columns: 1fr;
+        }
+      }
+      @media (max-width: 860px) {
+        .burger {
+          display: grid;
+          place-items: center;
+        }
+        .links {
+          position: absolute;
+          left: 0;
+          right: 0;
+          top: 100%;
+          background: #fff;
+          flex-direction: column;
+          align-items: stretch;
+          gap: 4px;
+          padding: 12px 20px 18px;
+          border-bottom: 1px solid var(--line);
+          box-shadow: 0 14px 24px rgba(0, 0, 0, 0.08);
+          display: none;
+          margin: 0;
+        }
+        .nav-open .links {
+          display: flex;
+        }
+        .links a {
+          padding: 10px 4px;
+        }
+        .hero .wrap {
+          grid-template-columns: 1fr;
+          padding-top: 36px;
+          padding-bottom: 40px;
+        }
+        .chip.a {
+          left: 8px;
+        }
+        .chip.b {
+          right: 8px;
+        }
+        .about {
+          grid-template-columns: 1fr;
+          text-align: center;
+          padding: 24px;
+        }
+        .auth {
+          grid-template-columns: 1fr;
+        }
+        .auth-side {
+          padding: 26px 22px;
+        }
+        .auth-side ul,
+        .auth-side p {
+          display: none;
+        }
+        .auth-side h2 {
+          font-size: 22px;
+          margin: 0;
+        }
+      }
+      @media (max-width: 520px) {
+        .cats,
+        .feats {
+          grid-template-columns: 1fr;
+        }
+        .auth-card {
+          padding: 22px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="pub-nav">
+      <div class="in">
+        <a class="brand" href="index.html"><span class="logo">🌏</span> WebGIS</a>
+        <button class="burger" id="burger" aria-label="Buka menu">☰</button>
+        <nav class="links">
+          <a href="#tentang">Tentang</a><a href="#kategori">Kategori</a><a href="#fitur">Fitur</a
+          ><a href="#cara">Cara Pakai</a>
+          <a class="btn ghost" href="login.html" data-auth="guest">Login</a>
+          <a class="btn" href="register.html" data-auth="guest">Daftar</a>
+          <a class="btn" href="home.html" data-auth="user" hidden>Buka Dashboard</a>
+        </nav>
+      </div>
+    </header>
+
+    <section class="hero">
+      <div class="wrap">
+        <div>
+          <span class="tag">📍 Sistem Informasi Geografis berbasis web</span>
+          <h1>Jelajahi dan kelola <span>data spasial</span> dengan mudah</h1>
+          <p>
+            Lihat peta interaktif, kumpulkan data dari berbagai kategori, dan buat peta Anda sendiri
+            langsung dari browser.
+          </p>
+          <div class="cta">
+            <a class="btn lg" href="register.html" data-auth="guest">Mulai Sekarang</a>
+            <a class="btn ghost lg" href="login.html" data-auth="guest">Login</a>
+            <a class="btn lg" href="home.html" data-auth="user" hidden>Buka Dashboard</a>
+          </div>
+        </div>
+        <div class="hero-art">
+          <svg viewBox="0 0 560 420" role="img" aria-label="Ilustrasi peta dengan penanda lokasi">
+            <defs>
+              <linearGradient id="sea" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stop-color="#bfe6f6" />
+                <stop offset="1" stop-color="#e6f6fb" />
+              </linearGradient>
+            </defs>
+            <rect width="560" height="420" fill="url(#sea)" />
+            <g stroke="#ffffff" stroke-opacity=".7" stroke-width="1.5">
+              <path d="M0 105H560M0 210H560M0 315H560M140 0V420M280 0V420M420 0V420" />
+            </g>
+            <path
+              d="M40 250c30-40 90-50 130-30s70 40 60 80-70 60-130 50-90-60-60-100z"
+              fill="#9fd18b"
+            />
+            <path
+              d="M250 90c40-30 110-30 150 0s40 80-10 100-110 0-140-30-20-50 0-70z"
+              fill="#b7d86a"
+            />
+            <path
+              d="M380 250c30-20 80-10 100 20s0 70-40 80-70-20-70-50 0-40 10-50z"
+              fill="#f2cf86"
+            />
+            <path d="M90 90c20-18 60-14 70 8s-10 44-40 44-50-30-30-52z" fill="#7bc96f" />
+            <g>
+              <path d="M150 205c0-18 26-18 26 0 0 14-13 30-13 30s-13-16-13-30z" fill="#2f8f4e" />
+              <circle cx="163" cy="203" r="5" fill="#fff" />
+              <path d="M320 120c0-18 26-18 26 0 0 14-13 30-13 30s-13-16-13-30z" fill="#6b8e23" />
+              <circle cx="333" cy="118" r="5" fill="#fff" />
+              <path d="M440 270c0-18 26-18 26 0 0 14-13 30-13 30s-13-16-13-30z" fill="#c2703a" />
+              <circle cx="453" cy="268" r="5" fill="#fff" />
+              <path d="M205 300c0-18 26-18 26 0 0 14-13 30-13 30s-13-16-13-30z" fill="#2b7bb9" />
+              <circle cx="218" cy="298" r="5" fill="#fff" />
+            </g>
+            <path
+              d="M163 235Q240 300 218 330M333 150Q380 210 453 300"
+              stroke="#0e7c66"
+              stroke-width="2.5"
+              stroke-dasharray="6 6"
+              fill="none"
+            />
+          </svg>
+          <span class="chip a">📌 14 titik data</span><span class="chip b">🗺️ 4 kategori</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="block" id="tentang">
+      <div class="wrap">
+        <div class="about">
+          <div class="ic">🛰️</div>
+          <p>
+            WebGIS (Sistem Informasi Geografis berbasis web) adalah aplikasi pemetaan digital atau
+            Sistem Informasi Geografis (SIG) yang memanfaatkan jaringan internet sebagai media
+            komunikasi untuk mengelola, menampilkan, menganalisis, dan mendistribusikan data spasial
+            secara daring.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="block" id="kategori" style="padding-top: 0">
+      <div class="wrap">
+        <h2 class="h2">Kategori Data</h2>
+        <p class="sub">Data dikelompokkan agar mudah dicari dan dianalisis.</p>
+        <div class="cats">
+          <div class="cat c-geografis">
+            <span class="e">🧭</span>
+            <div><b>GEOGRAFIS</b><br /><small>Wilayah, medan, dan bentang alam</small></div>
+          </div>
+          <div class="cat c-infrastruktur">
+            <span class="e">🏗️</span>
+            <div><b>INFRASTRUKTUR</b><br /><small>Jembatan, terminal, dan bendungan</small></div>
+          </div>
+          <div class="cat c-lingkungan">
+            <span class="e">🌿</span>
+            <div><b>LINGKUNGAN</b><br /><small>Ruang hijau, udara, dan perairan</small></div>
+          </div>
+          <div class="cat c-sosial">
+            <span class="e">🏘️</span>
+            <div><b>SOSIAL</b><br /><small>Kesehatan, pendidikan, dan ekonomi</small></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="block" id="fitur" style="padding-top: 0">
+      <div class="wrap">
+        <h2 class="h2">Fitur Utama</h2>
+        <p class="sub">Semua yang Anda butuhkan untuk bekerja dengan data peta.</p>
+        <div class="feats">
+          <div class="feat">
+            <i>🗺️</i>
+            <h3>Peta Interaktif</h3>
+            <p>Zoom, geser, dan ganti tampilan peta jalan atau satelit.</p>
+          </div>
+          <div class="feat">
+            <i>📊</i>
+            <h3>Pooling Data</h3>
+            <p>Gabungan seluruh data dengan pencarian, filter, dan unduh CSV.</p>
+          </div>
+          <div class="feat">
+            <i>✏️</i>
+            <h3>Make a Map</h3>
+            <p>Tambah titik lokasi sendiri dan ekspor sebagai GeoJSON.</p>
+          </div>
+          <div class="feat">
+            <i>⭐</i>
+            <h3>Bookmarks</h3>
+            <p>Simpan data penting agar mudah dibuka kembali.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="block" id="cara" style="padding-top: 0">
+      <div class="wrap">
+        <h2 class="h2">Cara Pakai</h2>
+        <p class="sub">Tiga langkah singkat untuk memulai.</p>
+        <div class="steps">
+          <div class="step">
+            <h3>Daftar &amp; Login</h3>
+            <p>Buat akun gratis, lalu masuk ke dashboard Anda.</p>
+          </div>
+          <div class="step">
+            <h3>Jelajahi Data</h3>
+            <p>Pilih kategori atau buka Overview untuk melihat sebaran data di peta.</p>
+          </div>
+          <div class="step">
+            <h3>Buat &amp; Simpan</h3>
+            <p>
+              Tambah titik di Make a Map, beri bintang pada data penting, lalu logout kapan saja.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="block" style="padding-top: 0">
+      <div class="wrap">
+        <div class="band">
+          <h2>Siap menjelajahi peta Anda?</h2>
+          <p>Gunakan akun demo untuk langsung mencoba.</p>
+          <div class="cta" style="justify-content: center">
+            <a class="btn lg" href="register.html" data-auth="guest">Daftar Gratis</a>
+            <a class="btn ghost lg" href="login.html" data-auth="guest">Login</a>
+            <a class="btn lg" href="home.html" data-auth="user" hidden>Buka Dashboard</a>
+          </div>
+        </div>
+      </div>
+    </section>
+    <footer class="pub">
+      © 2026 WebGIS · Sistem Informasi Geografis berbasis web · Dibuat oleh <b>Marsyanda</b>
+    </footer>
+  </body>
+</html>
